@@ -20,7 +20,7 @@ let main argv =
         0
 
     | Error (code, msg:string) ->
-        Console.Error.Write (ErrorHandling.ErrorStrings.[-1 * code])
+        let cd = int(code)
+        Console.Error.Write (ErrorHandling.ErrorStrings.[-1 * cd])
         Console.Error.WriteLine (msg)
-        code
-
+        cd

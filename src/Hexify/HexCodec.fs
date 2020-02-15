@@ -24,13 +24,30 @@ module HexCodec =
             let v = byte((hi <<< 4) ||| lo)
             bl.Add(v)        
 
+
+    let private checkConfigAndExecute config action =
+        match config.inPath with
+        | Some inPath ->
+            match config.outPath with
+            | Some outPath -> action (inPath, outPath)
+            | None ->
+                Error (ErrorHandling.ErrorCode.ConfigError, "output path is none") 
+        | None ->
+            Error (ErrorHandling.ErrorCode.ConfigError, "input path is none")
+
+
     let encode config =
-        // match config.InPath with
-        // | Some path -> 
-        // | None ->
-
-        let input = FileSystem.readBinary (inFile)
-        Error (-1, "broken")
-
+        let encoder (inFile, outFile) =
+            match FileSystem.readBinary inFile with
+            | Ok bytes ->
+                let byteLines = bytes |> List.ofArray |> List.chunkBySize config.bpl
+                let txt = "hello"
+                FileSystem.writeText outFile txt
+            | Error (code, msg) ->
+                Error (code, msg)
+        
+        checkConfigAndExecute config encoder
+        
+        
     let decode config = 
-        Ok 0
+        Ok ()
