@@ -6,7 +6,7 @@ module FileSystem =
 
     let readText filePath =
         try
-            File.ReadAllText(filePath) |> Ok
+            File.ReadAllLines(filePath) |> Ok
         with
         | e -> Error(ErrorHandling.ErrorCode.FileError, e.Message)
 
