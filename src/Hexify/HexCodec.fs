@@ -31,7 +31,7 @@ module HexCodec =
     let private binToHex (v:int) (strBld:StringBuilder) = 
         strBld.Append(hexMap.[v]) |> ignore
 
-    let private HexToBin (hc:char) (lc:char) (bl:IList<byte>) = 
+    let private hexToBin (hc:char) (lc:char) (bl:IList<byte>) = 
         let hi = hexStr.IndexOf(hc)
         let lo = hexStr.IndexOf(lc)
         if hi = -1 || lo = -1 then
@@ -42,9 +42,9 @@ module HexCodec =
 
 
     let private checkConfigAndExecute config action =
-        match config.inPath with
+        match config.InPath with
         | Some inPath ->
-            match config.outPath with
+            match config.OutPath with
             | Some outPath -> action (inPath, outPath)
             | None ->
                 Error (ErrorHandling.ErrorCode.ConfigError, "output path is none") 
@@ -58,13 +58,29 @@ module HexCodec =
             List.iter (fun v -> binToHex (int(v)) strBld) line
             strBld.AppendLine() |> ignore
 
+        let processLineWithAddress strBld n (line: byte list) =
+            let addr = n * config.Bpl
+
+            binToHex ((addr &&& 0xff000000) >>> 24) strBld
+            binToHex ((addr &&& 0x00ff0000) >>> 16) strBld
+            binToHex ((addr &&& 0x0000ff00) >>> 8) strBld
+            binToHex (addr &&& 0x000000ff) strBld
+
+            strBld.Append(":\t") |> ignore
+
+            List.iter (fun v -> binToHex (int(v)) strBld) line
+            strBld.AppendLine() |> ignore
+
         let encoder (inFile, outFile) =
             match FileSystem.readBinary inFile with
             | Ok bytes ->
-                let byteLines = bytes |> List.ofArray |> List.chunkBySize config.bpl
+                let byteLines = bytes |> List.ofArray |> List.chunkBySize config.Bpl
                 let strBld = StringBuilder()
 
-                List.iter (fun line -> processLine strBld line) byteLines
+                if config.Addr then
+                    List.iter (fun line -> processLine strBld line) byteLines
+                else
+                    List.iteri (fun i line -> processLineWithAddress strBld i line) byteLines
                 FileSystem.writeText outFile (strBld.ToString())
             | Error (code, msg) ->
                 Error (code, msg)
@@ -74,20 +90,26 @@ module HexCodec =
         
     let decode config =
 
+        let inline removeAddress (line:string) =
+            line.Substring(10)
+
         let processLine (line:string) (bl:IList<byte>) =
             let len = String.length line
             let rec looper n =
                 if n<len then
-                    HexToBin line.[n] line.[n+1] bl
+                    hexToBin line.[n] line.[n+1] bl
                     looper (n+2)
             looper 0
 
         let decoder (inFile, outFile) =
             match FileSystem.readText inFile with
             | Ok txtLines ->
-                let lst = List<byte>();
+                let lst = List<byte>()
                 
-                Array.iter (fun line -> processLine line lst) txtLines
+                if (txtLines.[0].Length > 8 && txtLines.[0].[8] = ':') then
+                    Array.iter (fun line -> processLine (removeAddress line) lst) txtLines
+                else
+                    Array.iter (fun line -> processLine line lst) txtLines
                 
                 FileSystem.writeBinary outFile (lst.ToArray())
             | Error (code, msg) ->

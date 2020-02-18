@@ -5,30 +5,30 @@ open System
 type Mode = Encode | Decode
 
 type Config = {
-    mode : Mode
-    bpl  : int  // Bytes per line
-    addr : bool
-    inPath : string option
-    outPath : string option
+    Mode : Mode
+    Bpl  : int  // Bytes per line
+    Addr : bool
+    InPath : string option
+    OutPath : string option
 }
 
 module Config =
 
-    let defaultConfig = { mode = Encode; bpl = 32; addr = false; inPath = None; outPath = None }
+    let defaultConfig = { Mode = Encode; Bpl = 32; Addr = false; InPath = None; OutPath = None }
 
     let create operation bytesPerLine showAddress inputPath outputPath = 
-        { mode = operation; bpl = bytesPerLine; addr = showAddress; inPath = inputPath; outPath = outputPath }
+        { Mode = operation; Bpl = bytesPerLine; Addr = showAddress; InPath = inputPath; OutPath = outputPath }
 
-    let setMode operation cfg = {cfg with mode = operation}
+    let setMode operation cfg = {cfg with Mode = operation}
 
-    let setBytesPerLine bytesPerLine cfg = {cfg with bpl = bytesPerLine}
+    let setBytesPerLine bytesPerLine cfg = {cfg with Bpl = bytesPerLine}
 
-    let setShowAddress showAddress cfg = {cfg with addr = showAddress}
+    let setShowAddress showAddress cfg = {cfg with Addr = showAddress}
 
     let setInputPath inputPath cfg = 
         let maybePath = if (String.IsNullOrWhiteSpace(inputPath)) then None else Some(inputPath)
-        {cfg with inPath = maybePath}
+        {cfg with InPath = maybePath}
 
     let setOutputPath outputPath cfg = 
         let maybePath = if (String.IsNullOrWhiteSpace(outputPath)) then None else Some(outputPath)
-        {cfg with outPath = maybePath}
+        {cfg with OutPath = maybePath}

@@ -34,7 +34,7 @@ let main argv =
     
     let cfg = parseArgs Config.defaultConfig [for c in argv -> c]
 
-    let statCode = match cfg.mode with
+    let statCode = match cfg.Mode with
                    | Encode -> HexCodec.encode cfg
                    | Decode -> HexCodec.decode cfg
 
