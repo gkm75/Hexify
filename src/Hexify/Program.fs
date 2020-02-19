@@ -5,13 +5,13 @@ let usage() =
     printfn "Usage: Hexify [-e] [-d] [-a] [-n] [-b num] [-i inputPath] [-o outputPath]"
     printfn ""
     printfn "where;"
-    printfn "[-e]"
-    printfn "[-d]"
-    printfn "[-a]"
-    printfn "[-n]"
-    printfn "[-b num]"
-    printfn "[-i inputPath]"
-    printfn "[-o outputPath]"
+    printfn "[-e]\t\tEncode"
+    printfn "[-d]\t\tDecode"
+    printfn "[-a]\t\tShow address"
+    printfn "[-n]\t\tHide address"
+    printfn "[-b num]\tBytes per line"
+    printfn "[-i inputPath]\tThe input path / file"
+    printfn "[-o outputPath]\tThe output path / file"
 
 let rec parseArgs cfg = function
     | [] -> cfg

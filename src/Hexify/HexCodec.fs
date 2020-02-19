@@ -4,8 +4,6 @@ open System
 open System.Text
 open System.Collections.Generic
 
-open Config
-
 module HexCodec =
 
     let private hexStr = "0123456789abcdef"
@@ -106,12 +104,16 @@ module HexCodec =
             | Ok txtLines ->
                 let lst = List<byte>()
                 
-                if (txtLines.[0].Length > 8 && txtLines.[0].[8] = ':') then
-                    Array.iter (fun line -> processLine (removeAddress line) lst) txtLines
+                if (txtLines.Length > 0) then
+                    if (txtLines.[0].Length > 8 && txtLines.[0].[8] = ':') then
+                        Array.iter (fun line -> processLine (removeAddress line) lst) txtLines
+                    else
+                        Array.iter (fun line -> processLine line lst) txtLines
+                    
+                    FileSystem.writeBinary outFile (lst.ToArray())
                 else
-                    Array.iter (fun line -> processLine line lst) txtLines
-                
-                FileSystem.writeBinary outFile (lst.ToArray())
+                    Error(ErrorHandling.ErrorCode.DecodeError, "Nothing to do")
+
             | Error (code, msg) ->
                 Error (code, msg)
 
